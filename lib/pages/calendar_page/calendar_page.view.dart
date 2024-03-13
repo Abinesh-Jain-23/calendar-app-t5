@@ -11,16 +11,7 @@ class CalendarPageView extends GetResponsiveView<CalendarPageController> {
     return Scaffold(
       appBar: AppBar(title: const Text('Calendar')),
       body: ListView(
-        children: [
-          CalendarComponent(
-            onDayTapped: (day) => print(day),
-          ),
-          ElevatedButton(
-              onPressed: () {
-                controller.calendarClient.insert('title', DateTime.now(),
-                    DateTime.now().add(const Duration(days: 1)));
-              },
-              child: Text('Insert'))
+        children: const [CalendarComponent()
         ],
       ),
     );

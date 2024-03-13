@@ -1,3 +1,5 @@
+import 'package:calendar_app_t5/services/api_service.dart';
+import 'package:calendar_app_t5/services/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -14,6 +16,7 @@ class CalendarComponent extends StatefulWidget {
 class _CalendarComponentState extends State<CalendarComponent> {
   final DateFormat dateFormat = DateFormat('dd MMMM yyyy');
   List<Event> events = [];
+  SocketService socket = SocketService();
 
   Widget? defaultBuilder(
     BuildContext context,
@@ -46,6 +49,8 @@ class _CalendarComponentState extends State<CalendarComponent> {
     }
   }
 
+  final ApiService api = ApiService();
+
   addEvent(DateTime date, String? eventName) {
     final form = GlobalKey<FormState>();
     bool update = eventName != null;
@@ -74,11 +79,21 @@ class _CalendarComponentState extends State<CalendarComponent> {
           TextButton(
             onPressed: () {
               if (form.currentState != null && form.currentState!.validate()) {
-                update
-                    ? updateEvent(date, eventName!)
-                    : events.add(Event(name: eventName!, date: date));
+                if (update) {
+                  updateEvent(date, eventName!);
+                } else {
+                  events.add(Event(name: eventName!, date: date));
+                }
+                api.post(events
+                    .map((event) => {
+                          'event_name': event.name,
+                          'event_date':
+                              DateFormat("yyyy-MM-dd").format(event.date)
+                        })
+                    .toList());
                 Navigator.of(context).pop();
                 setState(() {});
+                socket.socket.emit('event', eventName);
               } else {}
             },
             child: const Text('Save'),
@@ -152,6 +167,21 @@ class _CalendarComponentState extends State<CalendarComponent> {
                   ))
               .toList(),
         );
+
+  @override
+  void initState() {
+    super.initState();
+    socket.init();
+    socket.socket.emit('event', 'event');
+    api.getEvents().then((value) {
+      events.addAll(value.map((event) => Event(
+          name: '${event['event_name']}',
+          date: DateTime.parse(
+            '${event['event_date']}',
+          ))));
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

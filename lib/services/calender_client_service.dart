@@ -15,7 +15,7 @@ class CalendarClient {
       prompt,
     ).then((AuthClient client) {
       var calendar = CalendarApi(client);
-      calendar.calendarList.list().then((value) => print("VAL________$value"));
+      calendar.calendarList.list().then((value) {});
 
       String calendarId = "primary";
       Event event = Event();
@@ -33,7 +33,6 @@ class CalendarClient {
       event.end = end;
       try {
         calendar.events.insert(event, calendarId).then((value) {
-          print("ADDEDDD_________________${value.status}");
           if (value.status == "confirmed") {
             log('Event added in google calendar');
           } else {
@@ -47,10 +46,6 @@ class CalendarClient {
   }
 
   void prompt(String url) async {
-    print("Please go to the following URL and grant access:");
-    print("  => $url");
-    print("");
-
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url));
     } else {
