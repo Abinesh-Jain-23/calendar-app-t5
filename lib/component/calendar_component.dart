@@ -159,6 +159,13 @@ class _CalendarComponentState extends State<CalendarComponent> {
                         onPressed: () {
                           events.remove(event);
                           setState(() {});
+                          api.post(events
+                              .map((event) => {
+                                    'event_name': event.name,
+                                    'event_date': DateFormat("yyyy-MM-dd")
+                                        .format(event.date)
+                                  })
+                              .toList());
                         },
                         icon: const Icon(
                           Icons.delete_forever,
